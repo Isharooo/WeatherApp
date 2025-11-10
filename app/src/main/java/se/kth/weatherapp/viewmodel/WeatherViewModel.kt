@@ -26,15 +26,12 @@ class WeatherViewModel : ViewModel() {
     private val parser = WeatherParser()
     private lateinit var prefsManager: PreferencesManager
 
-    // UI State
     private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Initial)
     val uiState: StateFlow<WeatherUiState> = _uiState.asStateFlow()
 
-    // Location search results
     private val _searchResults = MutableStateFlow<List<Location>>(emptyList())
     val searchResults: StateFlow<List<Location>> = _searchResults.asStateFlow()
 
-    // Favorites
     private val _favorites = MutableStateFlow<List<FavoriteLocation>>(emptyList())
     val favorites: StateFlow<List<FavoriteLocation>> = _favorites.asStateFlow()
 
@@ -58,7 +55,6 @@ class WeatherViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = WeatherUiState.Loading
 
-            // Kolla internet
             if (!NetworkUtils.hasInternetConnection(context)) {
                 val cachedData = prefsManager.getLastForecast()
                 if (cachedData != null) {
@@ -73,7 +69,6 @@ class WeatherViewModel : ViewModel() {
                 return@launch
             }
 
-            // Hämta från API
             val result = repository.fetchForecastForCoordinates(latitude, longitude, locationName)
 
             result.fold(

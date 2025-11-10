@@ -14,14 +14,14 @@ object WeatherIconMapper {
      */
     fun getWeatherIcon(weatherSymbol: Int): ImageVector {
         return when (weatherSymbol) {
-            1, 2 -> Icons.Default.WbSunny // Clear sky, Nearly clear
-            3, 4 -> Icons.Default.WbCloudy // Variable cloudiness
-            5, 6 -> Icons.Default.Cloud // Cloudy, Overcast
-            7 -> Icons.Default.CloudQueue // Fog
-            8, 9, 10 -> Icons.Default.Grain // Light rain
-            11, 12, 13, 14 -> Icons.Default.Thunderstorm // Thunderstorm
-            15, 16, 17, 18 -> Icons.Default.AcUnit // Snow
-            19, 20, 21 -> Icons.Default.Grain // Sleet/rain
+            1, 2 -> Icons.Default.WbSunny
+            3, 4 -> Icons.Default.WbCloudy
+            5, 6 -> Icons.Default.Cloud
+            7 -> Icons.Default.CloudQueue
+            8, 9, 10 -> Icons.Default.Grain
+            11, 12, 13, 14 -> Icons.Default.Thunderstorm
+            15, 16, 17, 18 -> Icons.Default.AcUnit
+            19, 20, 21 -> Icons.Default.Grain
             else -> Icons.Default.WbCloudy
         }
     }
