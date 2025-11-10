@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import se.kth.weatherapp.ui.components.*
@@ -23,16 +22,15 @@ import se.kth.weatherapp.viewmodel.WeatherViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
 fun WeatherScreen(
     viewModel: WeatherViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
 
-    var latitude by remember { mutableStateOf("") }
-    var longitude by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         viewModel.initialize(context)
@@ -58,23 +56,27 @@ fun WeatherScreen(
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
             item {
-                CoordinateInputFields(
-                    latitude = latitude,
-                    longitude = longitude,
-                    onLatitudeChange = { latitude = it },
-                    onLongitudeChange = { longitude = it },
-                    onSubmit = {
-                        val lat = latitude.toDoubleOrNull()
-                        val lon = longitude.toDoubleOrNull()
-                        if (lat != null && lon != null) {
-                            viewModel.fetchWeatherByCoordinates(
-                                latitude = lat,
-                                longitude = lon,
-                                locationName = "Plats (${lat}, ${lon})",
-                                context = context
-                            )
+                LocationSearchBar(
+                    query = searchQuery,
+                    onQueryChange = {
+                        searchQuery = it
+                        if (it.length >= 2) {
+                            viewModel.searchLocations(it)
+                        } else {
+                            viewModel.clearSearchResults()
                         }
-                    }
+                    },
+                    searchResults = searchResults,
+                    onLocationSelected = { location ->
+                        searchQuery = ""
+                        viewModel.fetchWeatherByCoordinates(
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            locationName = location.name,
+                            context = context
+                        )
+                    },
+                    onClearResults = { viewModel.clearSearchResults() }
                 )
             }
 
@@ -90,8 +92,7 @@ fun WeatherScreen(
                 items(favorites) { favorite ->
                     OutlinedButton(
                         onClick = {
-                            latitude = favorite.latitude.toString()
-                            longitude = favorite.longitude.toString()
+                            searchQuery = ""
                             viewModel.fetchWeatherByCoordinates(
                                 latitude = favorite.latitude,
                                 longitude = favorite.longitude,
@@ -116,7 +117,7 @@ fun WeatherScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Ange koordinater för att se väderprognos",
+                                text = "Sök efter en plats för att se väderprognos",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

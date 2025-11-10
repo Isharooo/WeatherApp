@@ -37,7 +37,6 @@ class WeatherParser {
     private fun extractHourlyData(series: TimeSeries): HourlyForecast {
         val params = series.parameters
 
-        // Konvertera molntäckning från oktas (0-8) till procent
         val cloudOktas = findParamValue(params, "tcc_mean") ?: 0.0
         val cloudPercent = ((cloudOktas / 8.0) * 100.0).toInt()
 
@@ -75,14 +74,18 @@ class WeatherParser {
 
     /**
      * Konverterar plats-sökresultat
+     * SMHI returnerar ibland olika format
      */
     fun parseLocations(results: List<SmhiLocationResponse>): List<Location> {
-        return results.map { result ->
-            Location(
-                name = result.name,
-                latitude = result.lat,
-                longitude = result.lon
-            )
-        }
+        return results
+            .filter { it.category in listOf("locality", "municipality", "populated place") }
+            .map { result ->
+                Location(
+                    name = result.name,
+                    latitude = result.lat,
+                    longitude = result.lon
+                )
+            }
+            .distinctBy { it.name }
     }
 }
